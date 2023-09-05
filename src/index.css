@@ -66,6 +66,10 @@
     --input: 0 0% 14.9%;
     --ring: 0 0% 83.1%;
   }
+  .section {
+    padding-inline: 3rem;
+    margin-top: 5rem;
+  }
 }
 
 @layer base {

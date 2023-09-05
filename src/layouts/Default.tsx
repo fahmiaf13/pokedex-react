@@ -17,7 +17,7 @@ export default function Default({ children, title }: IDefaultLayout) {
         <title>{title ? `${title} | Pokedex` : "Pokedex"}</title>
       </Helmet>
       <Navbar />
-      <div className="px-[2rem] mt-[6rem] md:px-[5rem]">{children}</div>
+      <section>{children}</section>
     </React.Fragment>
   );
 }
