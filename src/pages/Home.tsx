@@ -7,10 +7,11 @@ import { title } from "case";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
-// import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Loading } from "@/components";
 import { setColorPokemon } from "@/utils/theme";
-// import { addToFavorites, removeFromFavorites } from "@/redux/favoriteSlice";
+import { addToFavorite, removeFromFavorite } from "@/redux/favoriteSlice";
+import { RootState } from "@/redux/store";
 
 const config = import.meta.env.VITE_BASE_URL;
 
@@ -18,9 +19,9 @@ export default function Home() {
   const navigate = useNavigate();
   const [pokemons, setPokemons] = useState<IPokemon[]>([]);
   const [nextPageUrl, setNextPageUrl] = useState<string | null>("");
-  const [favorites, setFavorites] = useState<string[]>([]);
-  // const [changeColor, setChangeColor] = useState("");
-  // const dispatch = useDispatch();
+
+  const dispatch = useDispatch();
+  const favorites = useSelector((state: RootState) => state.favorites);
 
   const fetchPokemonData = useCallback(async () => {
     const response = await axios.get(nextPageUrl || `${config}/pokemon?offset=0&limit=20`);
@@ -30,22 +31,13 @@ export default function Home() {
         return pokemonType.data;
       })
     );
-    setPokemons((prevPokemons: any) => [...prevPokemons, ...resPokemons]);
+    setPokemons((prevPokemons) => [...prevPokemons, ...resPokemons]);
     setNextPageUrl(response.data.next);
   }, [nextPageUrl]);
 
-  const fetchListTypePokemon = async () => {
-    try {
-      // const response = await axios.get("https://pokeapi.co/api/v2/type");
-      // console.log(response.data.results);
-    } catch (error) {
-      console.log(error);
-    }
-  };
   const { isLoading } = useQuery(["pokemons"], fetchPokemonData, { refetchOnMount: true });
 
   useEffect(() => {
-    fetchListTypePokemon();
     const handleScroll = () => {
       if (window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight) {
         if (nextPageUrl) {
@@ -59,21 +51,6 @@ export default function Home() {
     };
   }, [nextPageUrl, fetchPokemonData]);
 
-  const addToFavorites = (pokemonName: string) => {
-    setFavorites((prevFavorites) => [...prevFavorites, pokemonName]);
-    localStorage.setItem("favorites", JSON.stringify([...favorites, pokemonName]));
-  };
-
-  const getFavoritesFromLocalStorage = () => {
-    const favoritesData = localStorage.getItem("favorites");
-    if (favoritesData) {
-      setFavorites(JSON.parse(favoritesData));
-    }
-  };
-  useEffect(() => {
-    getFavoritesFromLocalStorage();
-  }, []);
-
   if (isLoading) {
     return <Loading />;
   }
@@ -85,9 +62,9 @@ export default function Home() {
         {pokemons.map((item) => {
           return (
             <Card
-              key={item.name}
+              key={item.id}
               style={{ backgroundColor: setColorPokemon(item.types[0].type.name), borderColor: setColorPokemon(item.types[0].type.name) }}
-              onClick={() => navigate(`/${item?.id}`)}
+              onClick={() => navigate(`/pokemon/${item?.id}`)}
               className="border-2 w-96 h-52 p-5 gap-10 flex items-center cursor-pointer relative duration-500"
             >
               <div className="w-7/12 flex flex-col">
@@ -102,16 +79,29 @@ export default function Home() {
                     );
                   })}
                 </div>
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // dispatch(addToFavorites(item.name));
-                  }}
-                  className="mt-3 flex gap-3 bg-secondary border-secondary/70 border-2 text-primary hover:bg-transparent hover:text-secondary scale-100 hover:scale-105"
-                >
-                  <Icon icon="material-symbols:bookmark" />
-                  <div>Add To Favorite</div>
-                </Button>
+                {favorites.includes(item.id) ? (
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dispatch(removeFromFavorite(item.id));
+                    }}
+                    className="mt-3 flex justify-center hover:bg-secondary border-secondary border-2 text-secondary bg-transparent hover:text-primary scale-100 hover:scale-105"
+                  >
+                    <Icon icon="ic:outline-bookmark-remove" width={24} />
+                    <div className="text-sm w-full">Unfavorite</div>
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dispatch(addToFavorite(item.id));
+                    }}
+                    className="mt-3 flex justify-center bg-secondary border-secondary border-2 text-primary hover:bg-transparent hover:text-secondary scale-100 hover:scale-105"
+                  >
+                    <Icon icon="ic:round-bookmark-add" width={24} />
+                    <div className="text-sm w-full">Favorite</div>
+                  </Button>
+                )}
               </div>
               <div className="w-5/12 flex items-center justify-center h-full">
                 <img className="h-full mt-5" src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${item.id}.svg`} />

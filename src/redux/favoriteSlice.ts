@@ -1,26 +1,29 @@
+// favoriteSlice.ts
 import { createSlice } from "@reduxjs/toolkit";
 
-interface FavoritesState {
-  favorites: string[];
-}
+const initialState: number[] = JSON.parse(localStorage.getItem("favorites") || "[]");
 
-const initialState: FavoritesState = {
-  favorites: [],
-};
-
-const favoritesSlice = createSlice({
+const favoriteSlice = createSlice({
   name: "favorites",
   initialState,
   reducers: {
-    addToFavorites: (state, action) => {
-      state.favorites.push(action.payload);
+    addToFavorite: (state, action) => {
+      const itemToAdd = action.payload;
+      if (!state.includes(itemToAdd)) {
+        state.push(itemToAdd);
+        localStorage.setItem("favorites", JSON.stringify(state));
+      }
     },
-    removeFromFavorites: (state, action) => {
-      state.favorites = state.favorites.filter((favorite) => favorite !== action.payload);
+    removeFromFavorite: (state, action) => {
+      const itemToRemove = action.payload;
+      const index = state.indexOf(itemToRemove);
+      if (index !== -1) {
+        state.splice(index, 1);
+        localStorage.setItem("favorites", JSON.stringify(state));
+      }
     },
   },
 });
 
-export const { addToFavorites, removeFromFavorites } = favoritesSlice.actions;
-
-export default favoritesSlice.reducer;
+export const { addToFavorite, removeFromFavorite } = favoriteSlice.actions;
+export default favoriteSlice.reducer;
