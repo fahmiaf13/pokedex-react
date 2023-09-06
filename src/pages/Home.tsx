@@ -8,7 +8,7 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
-import { Loading } from "@/components";
+import { EmptyAnimation, ErrorAnimation, Loading } from "@/components";
 import { setColorPokemon } from "@/utils/theme";
 import { addToFavorite, removeFromFavorite } from "@/redux/favoriteSlice";
 import { RootState } from "@/redux/store";
@@ -36,7 +36,6 @@ export default function Home() {
     setPokemons((prevPokemons) => [...prevPokemons, ...resPokemons]);
     setNextPageUrl(response.data.next);
   }, [nextPageUrl]);
-
   const fetchPokemonByType = async () => {
     const response = await axios.get(`https://pokeapi.co/api/v2/type`);
     return response.data;
@@ -52,23 +51,23 @@ export default function Home() {
     setPokemons(resPokemons);
   }, [selectedType]);
 
-  const { isLoading: PokemonDataLoading } = useQuery(["pokemon"], fetchPokemonData);
-  const { data: typesPokemon, isLoading: typesPokemonLoading } = useQuery(["typesPokemon"], fetchPokemonByType);
-  const { isLoading: listTypesPokemonLoading } = useQuery(["listTypesPokemon", selectedType], fetchListPokemonByType, { enabled: !!selectedType });
+  const { isLoading: PokemonDataLoading, isError: PokemonDataError } = useQuery(["pokemon"], fetchPokemonData);
+  const { data: typesPokemon, isLoading: typesPokemonLoading, isError: typesPokemonError } = useQuery(["typesPokemon"], fetchPokemonByType);
+  const { isLoading: listTypesPokemonLoading, isError: listTypesPokemonError } = useQuery(["listTypesPokemon", selectedType], fetchListPokemonByType, { enabled: !!selectedType });
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight) {
+      if (window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight && pokemons.length !== 0) {
         if (nextPageUrl) {
           fetchPokemonData();
         }
       }
-      if (window.scrollY > 300) {
-        setBackToTop(true);
-      } else {
-        setBackToTop(false);
-      }
     };
+    if (window.scrollY > 300) {
+      setBackToTop(true);
+    } else {
+      setBackToTop(false);
+    }
     if (selectedType) {
       fetchListPokemonByType();
     } else if (selectedType === null) {
@@ -79,7 +78,7 @@ export default function Home() {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [nextPageUrl, fetchPokemonData, fetchListPokemonByType, selectedType]);
+  }, [nextPageUrl, fetchPokemonData, fetchListPokemonByType, selectedType, pokemons.length]);
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -91,7 +90,9 @@ export default function Home() {
   if (PokemonDataLoading || typesPokemonLoading || listTypesPokemonLoading) {
     return <Loading />;
   }
-
+  if (PokemonDataError || typesPokemonError || listTypesPokemonError) {
+    return <ErrorAnimation />;
+  }
   const filteredListTypes = [{ name: "all", url: null }, ...typesPokemon.results.map((item: any) => item)];
 
   return (
@@ -111,9 +112,7 @@ export default function Home() {
         ))}
       </div>
       <div className="flex flex-wrap w-full justify-center gap-5">
-        {pokemons.length === 0 ? (
-          <div>Data Tidak Ada</div>
-        ) : (
+        {pokemons.length !== 0 ? (
           pokemons.map((item) => {
             return (
               <Card
@@ -164,6 +163,11 @@ export default function Home() {
               </Card>
             );
           })
+        ) : (
+          <div className="flex flex-col items-center">
+            <EmptyAnimation />
+            <div className="text-xl font-extrabold">Pokemon not found</div>
+          </div>
         )}
       </div>
       <Icon icon="icon-park-solid:up-c" width={36} onClick={scrollToTop} className={`cursor-pointer fixed bottom-10 right-10 ${backToTop ? "visible" : "hidden"} duration-500`}>

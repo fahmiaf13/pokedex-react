@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { Navbar } from "@/components";
+import { Navbar, Footer } from "@/components";
 import React from "react";
 
 interface IDefaultLayout {
@@ -18,6 +18,7 @@ export default function Default({ children, title }: IDefaultLayout) {
       </Helmet>
       <Navbar />
       <section>{children}</section>
+      <Footer />
     </React.Fragment>
   );
 }
