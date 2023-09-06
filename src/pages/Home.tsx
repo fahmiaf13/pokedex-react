@@ -57,15 +57,21 @@ export default function Home() {
 
   return (
     <div className="flex flex-col container mx-auto min-h-screen justify-center items-center section">
-      <div className="font-extrabold text-3xl my-5">Pokemon</div>
-      <div className="flex flex-wrap w-full justify-center gap-3">
+      <div className="font-extrabold text-3xl my-[10rem]">
+        Explore the Vast World of Pokemon With our Pokemon Pokedex
+        <div className="font-extralight">
+          you can delve into the rich and diverse world of Pokemon. Discover all the information you need about hundreds of different Pokemon, from their types and abilities to their statistics. This is your ultimate source for Pokemon
+          knowledge!
+        </div>
+      </div>
+      <div className="flex flex-wrap w-full justify-center gap-5">
         {pokemons.map((item) => {
           return (
             <Card
               key={item.id}
               style={{ backgroundColor: setColorPokemon(item.types[0].type.name), borderColor: setColorPokemon(item.types[0].type.name) }}
               onClick={() => navigate(`/pokemon/${item?.id}`)}
-              className="border-2 w-96 h-52 p-5 gap-10 flex items-center cursor-pointer relative duration-500"
+              className="border-2 w-96 h-52 p-5 gap-10 flex items-center cursor-pointer relative duration-500 scale-100 hover:scale-105"
             >
               <div className="w-7/12 flex flex-col">
                 <div className="font-extrabold text-secondary text-xl my-5">{title(item.name)}</div>
