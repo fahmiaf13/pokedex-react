@@ -37,7 +37,7 @@ export default function Home() {
     setNextPageUrl(response.data.next);
   }, [nextPageUrl]);
   const fetchPokemonByType = async () => {
-    const response = await axios.get(`https://pokeapi.co/api/v2/type`);
+    const response = await axios.get(`${config}/type`);
     return response.data;
   };
   const fetchListPokemonByType = useCallback(async () => {
