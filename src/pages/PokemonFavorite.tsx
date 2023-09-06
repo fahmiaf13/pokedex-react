@@ -22,7 +22,6 @@ export default function PokemonFavorite() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // console.log(JSON.stringify(favorites.map((item) => item)));
   const fetchPokemonData = async () => {
     const response = await Promise.all(
       favorites.map(async (item) => {
@@ -32,13 +31,12 @@ export default function PokemonFavorite() {
     );
     setPokemons(response);
   };
-  const { isLoading } = useQuery(["pokemons"], fetchPokemonData, { refetchOnMount: true });
+  const { isLoading } = useQuery(["pokemons"], fetchPokemonData);
 
   if (isLoading) {
     return <Loading />;
   }
 
-  console.log(pokemons);
   return (
     <div className="flex flex-col container mx-auto min-h-screen justify-center items-center section">
       <div className="font-extrabold text-3xl my-5">Pokemon</div>
@@ -68,6 +66,7 @@ export default function PokemonFavorite() {
                     onClick={(e) => {
                       e.stopPropagation();
                       dispatch(removeFromFavorite(item.id));
+                      window.location.reload();
                     }}
                     className="mt-3 flex justify-center hover:bg-secondary border-secondary border-2 text-secondary bg-transparent hover:text-primary scale-100 hover:scale-105"
                   >
